@@ -9,6 +9,8 @@ from opt_utils_v1a import load_params_and_grads, initialize_parameters, forward_
 from opt_utils_v1a import compute_cost, predict, predict_dec, plot_decision_boundary, load_dataset
 from copy import deepcopy
 
+
+
 def schedule_lr_decay(learning_rate0, epoch_num, decay_rate, time_interval=1000):
     """
     Calculates updated the learning rate using exponential weight decay.
@@ -355,3 +357,8 @@ def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01
         
 
     return parameters, v, s, v_corrected, s_corrected
+
+
+
+layers_dims = [train_set_x.shape[0], 20, 3, 1]
+model(train_set_x, train_set_y, layers_dims, "gd", learning_rate = 0.005, num_epochs = 20000)
