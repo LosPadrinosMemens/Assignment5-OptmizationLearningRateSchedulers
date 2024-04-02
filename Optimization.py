@@ -1,3 +1,12 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+from opt_utils_v1a import initialize_parameters, forward_propagation, backward_propagation
+from opt_utils_v1a import compute_cost
+from testCases import *
+from public_tests import *
+
 def schedule_lr_decay(learning_rate0, epoch_num, decay_rate, time_interval=1000):
     """
     Calculates updated the learning rate using exponential weight decay.
@@ -284,8 +293,7 @@ def initialize_adam(parameters) :
         s["db" + str(l)] = np.zeros(parameters["b" + str(l)].shape)
     
     return v, s
-def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01,
-                                beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8):
+def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8):
     """
     Update parameters using Adam
     
