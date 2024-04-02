@@ -42,15 +42,14 @@ def update_lr(learning_rate0, epoch_num, decay_rate):
     learning_rate = (1 / (1 + decay_rate * epoch_num)) * learning_rate0
     
     return learning_rate
-def model(X, Y, layers_dims, optimizer, learning_rate = 0.0007, mini_batch_size = 64, beta = 0.9,
-          beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8, num_epochs = 5000, print_cost = True):
+def model(X, Y, X_tuning, Y_tuning, layers_dims, optimizer, learning_rate = 0.0007, mini_batch_size = 64, beta = 0.9,
+          beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8, num_epochs = 20000, print_cost = True, decay=None, decay_rate=1):
     """
     3-layer neural network model which can be run in different optimizer modes.
     
     Arguments:
     X -- input data, of shape (2, number of examples)
     Y -- true "label" vector (1 for blue dot / 0 for red dot), of shape (1, number of examples)
-    optimizer -- the optimizer to be passed, gradient descent, momentum or adam
     layers_dims -- python list, containing the size of each layer
     learning_rate -- the learning rate, scalar.
     mini_batch_size -- the size of a mini batch
@@ -70,7 +69,11 @@ def model(X, Y, layers_dims, optimizer, learning_rate = 0.0007, mini_batch_size 
     t = 0                            # initializing the counter required for Adam update
     seed = 10                        # For grading purposes, so that your "random" minibatches are the same as ours
     m = X.shape[1]                   # number of training examples
-    
+    lr_rates = []
+    learning_rate0 = learning_rate   # the original learning rate
+    costs_tuning = []
+    m_tuning = X_tuning.shape[1]
+
     # Initialize parameters
     parameters = initialize_parameters(layers_dims)
 
@@ -114,18 +117,26 @@ def model(X, Y, layers_dims, optimizer, learning_rate = 0.0007, mini_batch_size 
                 parameters, v, s, _, _ = update_parameters_with_adam(parameters, grads, v, s,
                                                                t, learning_rate, beta1, beta2,  epsilon)
         cost_avg = cost_total / m
-        
+        if decay:
+            learning_rate = decay(learning_rate0, i, decay_rate)
         # Print the cost every 1000 epoch
-        if print_cost and i % 1000 == 0:
+        if print_cost and i % (num_epochs/4) == 0:
             print ("Cost after epoch %i: %f" %(i, cost_avg))
-        if print_cost and i % 100 == 0:
+            if decay:
+                print("learning rate after epoch %i: %f"%(i, learning_rate))
+        if print_cost and i % (num_epochs/50) == 0:
             costs.append(cost_avg)
-                
+            a3_tuning, caches_tuning = forward_propagation(X_tuning,parameters)
+            cost_tuning = compute_cost(a3_tuning,Y_tuning) / m_tuning
+            costs_tuning.append(cost_tuning)
+
     # plot the cost
-    plt.plot(costs)
+    plt.plot(costs, label = "Training loss")
+    plt.plot(costs_tuning, label='Validation loss')
     plt.ylabel('cost')
-    plt.xlabel('epochs (per 100)')
+    plt.xlabel(f'epochs (per {num_epochs/50})')
     plt.title("Learning rate = " + str(learning_rate))
+    plt.legend()
     plt.show()
 
     return parameters
